@@ -57,7 +57,7 @@ export interface Profile {
   interests: Category[]
   livesInAccommodation: boolean
   goal: Goal
-  /** May be empty; required only when emailNotifications is on */
+  /** Required and unique: students log in with it (email-only login) */
   email: string
   /** Opt-in to event emails; off by default */
   emailNotifications: boolean

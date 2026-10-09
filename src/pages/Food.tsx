@@ -18,9 +18,9 @@ export default function Food() {
 
   return (
     <main className="flex flex-col">
-      <header className="flex flex-col gap-2 px-4 pt-8 pb-4">
+      <header className="flex flex-col gap-2 px-4 pt-8 pb-4 lg:pt-12 lg:pb-6">
         <p className="type-eyebrow text-ink-muted">hungry?</p>
-        <h1 className="type-display-l">free food</h1>
+        <h1 className="type-display-l lg:type-display-xl">free food</h1>
       </header>
 
       <div className="sticky top-0 z-10 border-b border-line bg-surface px-4 py-3">

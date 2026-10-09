@@ -14,7 +14,7 @@ import { useAsync } from "@/hooks/useAsync"
 import { CATEGORY_LABEL, GOAL_LABEL } from "@/lib/categories"
 import { FIELD } from "@/lib/formStyles"
 import { formatWhen } from "@/lib/format"
-import { clearDraft, validateDetails, type DetailErrors } from "@/lib/registrationDraft"
+import { sameEmail, validateDetails, type DetailErrors } from "@/lib/registrationDraft"
 import { getTheme, saveTheme, type Theme } from "@/lib/theme"
 import { CATEGORIES, COLLEGES, GOALS, YEARS, type Category, type Profile as ProfileData } from "@/types"
 
@@ -58,6 +58,12 @@ function ProfileScreen({ profile }: { profile: ProfileData }) {
 
     setStatus("saving")
     try {
+      // Email is the login, so it must stay unique.
+      if (!sameEmail(form.email, profile.email) && (await api.emailTaken(form.email))) {
+        setErrors({ email: "Another account already uses that email." })
+        setStatus("idle")
+        return
+      }
       await saveProfile({ ...form, name: form.name.trim(), email: form.email.trim() })
       setStatus("saved")
       setTimeout(() => setStatus((s) => (s === "saved" ? "idle" : s)), 3000)
@@ -73,10 +79,11 @@ function ProfileScreen({ profile }: { profile: ProfileData }) {
   }
 
   return (
-    <main className="flex flex-col">
-      <header className="flex flex-col gap-2 px-4 pt-8 pb-6">
+    // Forms read best narrow, even on desktop.
+    <main className="flex w-full flex-col lg:max-w-2xl">
+      <header className="flex flex-col gap-2 px-4 pt-8 pb-6 lg:pt-12">
         <p className="type-eyebrow text-ink-muted">your profile</p>
-        <h1 className="type-display-l break-words">{profile.name}</h1>
+        <h1 className="type-display-l break-words lg:type-display-xl">{profile.name}</h1>
         <p className="text-ink-muted">
           {profile.college} · {profile.year.toLowerCase()}
         </p>
@@ -171,7 +178,7 @@ function ProfileScreen({ profile }: { profile: ProfileData }) {
         </label>
         <div className="flex flex-col gap-2">
           <Label htmlFor="email" className="type-label">
-            email
+            email <span className="font-normal text-ink-muted">(you log in with this)</span>
           </Label>
           <Input
             id="email"
@@ -191,10 +198,10 @@ function ProfileScreen({ profile }: { profile: ProfileData }) {
 
       <CheckInHistory />
       <Appearance />
-      <StartOver />
+      <Account />
 
       {(dirty || status === "saved") && (
-        <div className="sticky bottom-16 z-10 flex items-center gap-2 border-t border-line bg-surface p-4">
+        <div className="sticky bottom-16 z-10 flex items-center gap-2 border-t border-line bg-surface p-4 lg:bottom-0">
           {dirty ? (
             <>
               <PillButton variant="ghost" onClick={discard} disabled={status === "saving"}>
@@ -294,25 +301,23 @@ function Appearance() {
   )
 }
 
-/** Clears everything on this device; RequireProfile then sends the student back to Welcome. */
-function StartOver() {
-  const { clearProfile } = useProfile()
+/**
+ * Log out keeps the account (log back in with the same email).
+ * Start over also deletes it (mock mode). Either way RequireProfile then sends the student to Welcome.
+ */
+function Account() {
+  const { profile, logOut, startOver } = useProfile()
   const [confirming, setConfirming] = useState(false)
 
-  const reset = () => {
-    api.resetLocalData()
-    clearDraft()
-    clearProfile()
-  }
-
   return (
-    <Section title="start over">
+    <Section title="account">
+      <p className="text-ink-muted">Logged in as {profile?.email}</p>
       {confirming ? (
         <div className="flex flex-col gap-4">
-          <p className="text-ink-muted">This clears your profile, plans and check-ins on this device.</p>
+          <p>This deletes your profile, plans and check-ins.</p>
           <div className="flex gap-2">
-            <PillButton variant="secondary" onClick={reset}>
-              yes, start over
+            <PillButton variant="secondary" onClick={startOver}>
+              yes, delete
             </PillButton>
             <PillButton variant="ghost" onClick={() => setConfirming(false)}>
               cancel
@@ -320,9 +325,14 @@ function StartOver() {
           </div>
         </div>
       ) : (
-        <PillButton variant="secondary" className="self-start" onClick={() => setConfirming(true)}>
-          start over
-        </PillButton>
+        <div className="flex gap-2">
+          <PillButton variant="secondary" onClick={logOut}>
+            log out
+          </PillButton>
+          <PillButton variant="ghost" onClick={() => setConfirming(true)}>
+            start over
+          </PillButton>
+        </div>
       )}
     </Section>
   )

@@ -36,13 +36,13 @@ export default function Recommends() {
 
   return (
     <main className="flex flex-col">
-      <header className="flex flex-col gap-2 px-4 pt-8 pb-4">
+      <header className="flex flex-col gap-2 px-4 pt-8 pb-4 lg:pt-12 lg:pb-6">
         <p className="type-eyebrow text-ink-muted">hey {profile?.name}</p>
-        <h1 className="type-display-l">picked for you</h1>
+        <h1 className="type-display-l lg:type-display-xl">picked for you</h1>
       </header>
 
       {checkIn && (
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-4 lg:max-w-xl">
           <CheckIn key={checkIn.id} event={checkIn} onDone={(f) => checkInDone(f?.liked !== undefined)} />
         </div>
       )}

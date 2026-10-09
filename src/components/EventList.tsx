@@ -14,6 +14,9 @@ interface EventListProps {
   empty: ReactNode
 }
 
+/** One column on phones, 2 on tablets, 3 on wide desktops. */
+const GRID = "grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+
 /** List with loading skeletons, error + retry, and empty state. */
 export function EventList({ events, loading, error, onRetry, showWhy, empty }: EventListProps) {
   if (error) {
@@ -29,7 +32,7 @@ export function EventList({ events, loading, error, onRetry, showWhy, empty }: E
 
   if (!events) {
     return (
-      <div className="flex flex-col gap-6" aria-busy="true" aria-label="Loading events">
+      <div className={GRID} aria-busy="true" aria-label="Loading events">
         <EventCardSkeleton />
         <EventCardSkeleton />
         <EventCardSkeleton />
@@ -42,7 +45,7 @@ export function EventList({ events, loading, error, onRetry, showWhy, empty }: E
   }
 
   return (
-    <ul className="flex flex-col gap-6" aria-busy={loading}>
+    <ul className={GRID} aria-busy={loading}>
       {events.map((e, i) => (
         <li key={e.id}>
           <EventCard event={e} showWhy={showWhy} picked={showWhy && i === 0 && !!e.why} />

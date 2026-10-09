@@ -9,13 +9,13 @@ interface FilterChipsProps {
   onChange: (category: Category | null) => void
 }
 
-/** Horizontally scrolling single-select category filter. */
+/** Single-select category filter: scrolls sideways on phones, wraps on desktop. */
 export function FilterChips({ categories, selected, onChange }: FilterChipsProps) {
   return (
     <div
       role="radiogroup"
       aria-label="Filter by category"
-      className="-mx-4 flex gap-2 overflow-x-auto px-4 py-1 [scrollbar-width:none]"
+      className="-mx-4 flex gap-2 overflow-x-auto px-4 py-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0"
     >
       <Chip mode="radio" selected={selected === null} onClick={() => onChange(null)}>
         all

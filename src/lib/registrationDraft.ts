@@ -16,13 +16,15 @@ export const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test
 
 export type DetailErrors = Partial<Record<keyof RegistrationDraft, string>>
 
-/** Shared by Registration and Profile. Email is only required when event emails are switched on. */
+/** Shared by Registration and Profile. Email is required: it's how students log back in. */
 export function validateDetails(d: RegistrationDraft): DetailErrors {
   const errors: DetailErrors = {}
   if (!d.name.trim()) errors.name = "Tell us what to call you."
   if (!d.college) errors.college = "Pick your college."
   if (!d.year) errors.year = "Pick your year."
-  if (d.emailNotifications && !d.email.trim()) errors.email = "Add your email to get event emails."
-  else if (d.email.trim() && !isValidEmail(d.email)) errors.email = "That email doesn't look right."
+  if (!d.email.trim()) errors.email = "Add your email. You'll use it to log back in."
+  else if (!isValidEmail(d.email)) errors.email = "That email doesn't look right."
   return errors
 }
+
+export const sameEmail = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase()

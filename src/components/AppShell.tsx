@@ -1,12 +1,6 @@
 import type { ReactNode } from "react"
 
-/** Mobile-first frame: full width on phones, a centred 430px column on desktop. */
+/** Page ground. Layouts (FlowLayout, TabLayout) decide widths per screen size. */
 export function AppShell({ children }: { children: ReactNode }) {
-  return (
-    <div className="min-h-svh bg-surface-raised">
-      <div className="mx-auto flex min-h-svh w-full max-w-[430px] flex-col bg-surface min-[431px]:border-x min-[431px]:border-line">
-        {children}
-      </div>
-    </div>
-  )
+  return <div className="flex min-h-svh flex-col bg-surface">{children}</div>
 }

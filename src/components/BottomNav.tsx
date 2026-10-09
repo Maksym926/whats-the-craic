@@ -1,20 +1,15 @@
-import { CalendarDays, Pizza, UserRound, type LucideIcon } from "lucide-react"
 import { NavLink } from "react-router-dom"
+import { NAV_TABS } from "@/lib/navTabs"
 import { cn } from "@/lib/utils"
 
-const TABS: { to: string; label: string; icon: LucideIcon }[] = [
-  { to: "/events", label: "events", icon: CalendarDays },
-  { to: "/food", label: "food", icon: Pizza },
-  { to: "/profile", label: "profile", icon: UserRound },
-]
-
+/** Phones and tablets; desktop uses SideNav. */
 export function BottomNav() {
   return (
     <nav
       aria-label="Main"
-      className="sticky bottom-0 z-10 grid grid-cols-3 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]"
+      className="sticky bottom-0 z-10 grid grid-cols-3 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
-      {TABS.map(({ to, label, icon: Icon }) => (
+      {NAV_TABS.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}

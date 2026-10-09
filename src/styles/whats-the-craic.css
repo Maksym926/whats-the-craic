@@ -66,14 +66,15 @@
   .wtc-chip:focus-visible { outline: 2px solid var(--craic-blue-text); outline-offset: 2px; }
 
   .wtc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* Type scale from tokens.json, as classes (avoids Tailwind text-size vs colour merge clashes). */
-  .type-display-xl { font: 600 64px/0.95 var(--font-display); letter-spacing: -0.03em; }
-  .type-display-l { font: 600 40px/1 var(--font-display); letter-spacing: -0.025em; }
-  .type-title { font: 600 24px/28px var(--font-display); letter-spacing: -0.02em; }
-  .type-heading { font: 600 17px/22px var(--font-sans); letter-spacing: -0.01em; }
-  .type-body { font: 400 15px/22px var(--font-sans); }
-  .type-small { font: 400 13px/18px var(--font-sans); }
-  .type-label { font: 600 13px/16px var(--font-sans); }
-  .type-eyebrow { font: 600 11px/14px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; }
 }
+
+/* Type scale from tokens.json. Registered as Tailwind utilities so breakpoints work (lg:type-title),
+   and named type-* so class merging never confuses them with text colours. */
+@utility type-display-xl { font: 600 64px/0.95 var(--font-display); letter-spacing: -0.03em; }
+@utility type-display-l { font: 600 40px/1 var(--font-display); letter-spacing: -0.025em; }
+@utility type-title { font: 600 24px/28px var(--font-display); letter-spacing: -0.02em; }
+@utility type-heading { font: 600 17px/22px var(--font-sans); letter-spacing: -0.01em; }
+@utility type-body { font: 400 15px/22px var(--font-sans); }
+@utility type-small { font: 400 13px/18px var(--font-sans); }
+@utility type-label { font: 600 13px/16px var(--font-sans); }
+@utility type-eyebrow { font: 600 11px/14px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; }

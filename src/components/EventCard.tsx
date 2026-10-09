@@ -27,7 +27,7 @@ export function EventCard({ event, showWhy = false, picked = false }: EventCardP
       to={`/events/${event.id}`}
       state={{ why: event.why }}
       className={cn(
-        "wtc-card max-w-none transition-colors hover:border-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-craic-blue-text",
+        "wtc-card h-full max-w-none transition-colors hover:border-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-craic-blue-text",
         picked && "wtc-card--picked hover:border-craic-blue",
       )}
     >

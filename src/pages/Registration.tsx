@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import * as api from "@/api"
 import { Chip } from "@/components/Chip"
 import { FieldError } from "@/components/FieldError"
 import { PillButton } from "@/components/PillButton"
@@ -24,18 +25,35 @@ export default function Registration() {
   const navigate = useNavigate()
   const [draft, setDraft] = useState<RegistrationDraft>(() => loadDraft() ?? EMPTY)
   const [errors, setErrors] = useState<DetailErrors>({})
+  // Email already registered → offer log in instead.
+  const [taken, setTaken] = useState(false)
+  const [checking, setChecking] = useState(false)
 
   const update = <K extends keyof RegistrationDraft>(key: K, value: RegistrationDraft[K]) => {
     setDraft((d) => ({ ...d, [key]: value }))
     setErrors((e) => ({ ...e, [key]: undefined }))
+    if (key === "email") setTaken(false)
   }
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     const found = validateDetails(draft)
     setErrors(found)
     if (Object.keys(found).length) return
-    saveDraft({ ...draft, name: draft.name.trim(), email: draft.email.trim() })
+
+    const clean = { ...draft, name: draft.name.trim(), email: draft.email.trim() }
+    saveDraft(clean)
+    setChecking(true)
+    try {
+      if (await api.emailTaken(clean.email)) {
+        setTaken(true)
+        return
+      }
+    } catch {
+      // Can't check right now; Onboarding's save will surface any real problem.
+    } finally {
+      setChecking(false)
+    }
     navigate("/onboarding")
   }
 
@@ -99,7 +117,7 @@ export default function Registration() {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="email" className="type-label">
-            email <span className="font-normal text-ink-muted">(optional)</span>
+            email
           </Label>
           <Input
             id="email"
@@ -110,10 +128,23 @@ export default function Registration() {
             className={FIELD}
             value={draft.email}
             onChange={(e) => update("email", e.target.value)}
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? "email-error" : undefined}
+            aria-invalid={!!errors.email || taken}
+            aria-describedby={errors.email || taken ? "email-error" : "email-hint"}
           />
-          <FieldError id="email-error" message={errors.email} />
+          {taken ? (
+            <p id="email-error" role="alert" className="type-small text-negative">
+              There's already an account with that email.{" "}
+              <Link to="/login" className="font-semibold text-ink underline underline-offset-4">
+                Log in instead
+              </Link>
+            </p>
+          ) : errors.email ? (
+            <FieldError id="email-error" message={errors.email} />
+          ) : (
+            <p id="email-hint" className="type-small text-ink-muted">
+              You'll use this to log back in. No password needed.
+            </p>
+          )}
         </div>
 
         <label
@@ -136,8 +167,8 @@ export default function Registration() {
       </div>
 
       <div className="sticky bottom-0 mt-auto border-t border-line bg-surface p-4">
-        <PillButton type="submit" className="w-full">
-          next
+        <PillButton type="submit" className="w-full" disabled={checking}>
+          {checking ? "checking…" : "next"}
         </PillButton>
       </div>
     </form>

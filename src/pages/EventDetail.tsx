@@ -85,88 +85,95 @@ export default function EventDetail() {
     <main className="flex flex-1 flex-col">
       {topBar}
 
-      <article className="flex flex-col gap-6 px-4 pt-6 pb-8">
-        <EventImage event={event} />
+      {/* Phone: article, then a sticky bottom action bar. Desktop: article | action panel that stays in view. */}
+      <div className="flex flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-12 lg:px-4 lg:pt-4">
+        <article className="flex flex-col gap-6 px-4 pt-6 pb-8 lg:px-0 lg:pt-2">
+          <EventImage event={event} />
 
-        <div className="flex flex-col gap-2">
-          <p className="type-eyebrow text-ink-muted">{formatWhen(event.start)}</p>
-          <h1 className="type-title">{event.title}</h1>
-          <p className="type-small text-ink-muted">{event.organiser}</p>
-        </div>
+          <div className="flex flex-col gap-2">
+            <p className="type-eyebrow text-ink-muted">{formatWhen(event.start)}</p>
+            <h1 className="type-title lg:type-display-l">{event.title}</h1>
+            <p className="type-small text-ink-muted">{event.organiser}</p>
+          </div>
 
-        <div className="wtc-card__tags mt-0">
-          {event.categories.map((c) => (
-            <span key={c} className="wtc-tag">
-              {CATEGORY_LABEL[c]}
-            </span>
-          ))}
-        </div>
+          <div className="wtc-card__tags mt-0">
+            {event.categories.map((c) => (
+              <span key={c} className="wtc-tag">
+                {CATEGORY_LABEL[c]}
+              </span>
+            ))}
+          </div>
 
-        <ul className="flex flex-col border-y border-line">
-          <li className="flex items-center gap-3 border-b border-line py-3">
-            <MapPin className="size-5 shrink-0 text-ink-muted" aria-hidden />
-            {event.location}
-          </li>
-          <li className="flex items-center gap-3 py-3">
-            <Users className="size-5 shrink-0 text-ink-muted" aria-hidden />
-            <span aria-live="polite">{goingCount} going</span>
-          </li>
-        </ul>
+          <ul className="flex flex-col border-y border-line">
+            <li className="flex items-center gap-3 border-b border-line py-3">
+              <MapPin className="size-5 shrink-0 text-ink-muted" aria-hidden />
+              {event.location}
+            </li>
+            <li className="flex items-center gap-3 py-3">
+              <Users className="size-5 shrink-0 text-ink-muted" aria-hidden />
+              <span aria-live="polite">{goingCount} going</span>
+            </li>
+          </ul>
 
-        {why && (
-          <p className="flex items-start gap-2 rounded-card bg-blue-soft p-4 font-medium text-craic-blue-text lowercase">
-            <span className="wtc-dot mt-[7px] size-1.5" aria-hidden />
-            {why}
-          </p>
-        )}
+          {why && (
+            <p className="flex items-start gap-2 rounded-card bg-blue-soft p-4 font-medium text-craic-blue-text lowercase">
+              <span className="wtc-dot mt-[7px] size-1.5" aria-hidden />
+              {why}
+            </p>
+          )}
 
-        <p>{event.description}</p>
+          <p>{event.description}</p>
 
-        <a
-          href={event.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="type-small flex min-h-11 items-center gap-1 self-start text-ink-muted underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-craic-blue-text"
-        >
-          via {event.source} · view original
-          <ArrowUpRight className="size-4" aria-hidden />
-          <span className="sr-only">(opens in a new tab)</span>
-        </a>
-      </article>
+          <a
+            href={event.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="type-small flex min-h-11 items-center gap-1 self-start text-ink-muted underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-craic-blue-text"
+          >
+            via {event.source} · view original
+            <ArrowUpRight className="size-4" aria-hidden />
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+        </article>
 
-      <div className="sticky bottom-0 mt-auto flex flex-col gap-2 border-t border-line bg-surface p-4">
-        {ended ? (
-          feedback ? (
-            <FeedbackSummary liked={feedback.went ? feedback.liked : undefined} went={feedback.went} />
-          ) : going ? (
-            <CheckIn event={event} dismissible={false} onDone={(f) => f && setFeedback(f)} />
+        <div className="sticky bottom-0 mt-auto flex flex-col gap-2 border-t border-line bg-surface p-4 lg:top-8 lg:bottom-auto lg:mt-0 lg:gap-4 lg:rounded-card lg:border lg:p-6">
+          <div className="hidden flex-col gap-1 lg:flex">
+            <span className="type-eyebrow text-ink-muted">{formatWhen(event.start)}</span>
+            <span className="type-heading">{goingCount} going</span>
+          </div>
+          {ended ? (
+            feedback ? (
+              <FeedbackSummary liked={feedback.went ? feedback.liked : undefined} went={feedback.went} />
+            ) : going ? (
+              <CheckIn event={event} dismissible={false} onDone={(f) => f && setFeedback(f)} />
+            ) : (
+              <p className="text-center text-ink-muted">This one's over.</p>
+            )
           ) : (
-            <p className="text-center text-ink-muted">This one's over.</p>
-          )
-        ) : (
-          <>
-            {saveError && (
-              <p role="alert" className="type-small text-center text-negative">
-                Couldn't save that. Try again.
-              </p>
-            )}
-            <PillButton
-              variant={going ? "secondary" : "primary"}
-              aria-pressed={going}
-              className="w-full"
-              onClick={toggleGoing}
-            >
-              {going ? (
-                <>
-                  <Check className="size-4" aria-hidden /> you're going
-                </>
-              ) : (
-                "i'm going"
+            <>
+              {saveError && (
+                <p role="alert" className="type-small text-center text-negative">
+                  Couldn't save that. Try again.
+                </p>
               )}
-            </PillButton>
-            {going && <p className="type-small text-center text-ink-muted">Tap again if you can't make it.</p>}
-          </>
-        )}
+              <PillButton
+                variant={going ? "secondary" : "primary"}
+                aria-pressed={going}
+                className="w-full"
+                onClick={toggleGoing}
+              >
+                {going ? (
+                  <>
+                    <Check className="size-4" aria-hidden /> you're going
+                  </>
+                ) : (
+                  "i'm going"
+                )}
+              </PillButton>
+              {going && <p className="type-small text-center text-ink-muted">Tap again if you can't make it.</p>}
+            </>
+          )}
+        </div>
       </div>
     </main>
   )

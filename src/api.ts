@@ -1,11 +1,16 @@
 // The ONLY place the frontend fetches data.
 //
-// USE_MOCK = true  → in-memory mock events, nothing leaves the browser.
+// USE_MOCK = true  → in-memory mock events and accounts in localStorage; nothing leaves the browser.
 // USE_MOCK = false → calls the Vercel functions in /api:
 //   GET  /api/events     → Event[] (all events, raw; ranking happens here via lib/recommend)
-//   POST /api/profile    body: Profile                          → { id: string }
+//   POST /api/login      body: { email }                        → Account | 404 if no student has that email
+//   POST /api/profile    body: Profile & { id?: string }        → { id: string }  (create, or update when id is sent)
 //   POST /api/going      body: { studentId, eventId, going }    → { goingCount: number }
 //   POST /api/feedback   body: Feedback & { studentId }         → { ok: true }
+//
+//   Account = { id: string, profile: Profile, going: string[] (event ids), feedback: Feedback[] }
+//   Login is email-only (no password): a hackathon trade-off. Emails are unique per student
+//   and matched case-insensitively.
 //
 // "Going" and feedback are also kept in localStorage so the UI and ranking
 // react instantly, in both modes.
@@ -101,9 +106,77 @@ export async function getCheckInHistory(): Promise<{ event: Event; feedback: Fee
     .reverse()
 }
 
-/** "Start over": forget going, check-ins and dismissals on this device. (Server data is untouched.) */
-export function resetLocalData(): void {
+/** Forget going, check-ins and dismissals on this device. (Server data is untouched.) */
+function resetLocalData(): void {
   for (const key of [GOING_KEY, FEEDBACK_KEY, DISMISSED_KEY, STUDENT_ID_KEY]) removeKey(key)
+}
+
+// ---------- accounts (email-only login) ----------
+
+interface Account {
+  id?: string
+  profile: Profile
+  going: string[]
+  feedback: Feedback[]
+}
+
+// Mock mode keeps accounts in this browser, keyed by lowercase email, so register → log out → log in works in a demo.
+const MOCK_ACCOUNTS_KEY = "craic.mockAccounts"
+const emailKey = (email: string) => email.trim().toLowerCase()
+const mockAccounts = () => readJSON<Record<string, Account>>(MOCK_ACCOUNTS_KEY, {})
+
+async function findAccount(email: string): Promise<Account | null> {
+  if (USE_MOCK) {
+    await delay(150)
+    return mockAccounts()[emailKey(email)] ?? null
+  }
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email.trim() }),
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`POST /api/login failed: ${res.status}`)
+  return res.json() as Promise<Account>
+}
+
+/** Is this email already registered? (Before sign-up, or when changing email in Profile.) */
+export async function emailTaken(email: string): Promise<boolean> {
+  return (await findAccount(email)) !== null
+}
+
+/** Log in by email. Restores the student's plans and check-ins onto this device; null if no account. */
+export async function logIn(email: string): Promise<Profile | null> {
+  const account = await findAccount(email)
+  if (!account) return null
+  resetLocalData()
+  writeJSON(GOING_KEY, account.going)
+  writeJSON(FEEDBACK_KEY, account.feedback)
+  if (account.id) writeJSON(STUDENT_ID_KEY, account.id)
+  return account.profile
+}
+
+/** Log out: clear this device. The account stays, so logging back in restores everything. */
+export function logOut(profile: Profile): void {
+  if (USE_MOCK) saveMockAccount(profile) // snapshot latest plans + check-ins
+  resetLocalData()
+}
+
+/** Start over: clear this device, and in mock mode delete the demo account too. */
+export function deleteLocalAccount(profile: Profile): void {
+  if (USE_MOCK) {
+    const accounts = mockAccounts()
+    delete accounts[emailKey(profile.email)]
+    writeJSON(MOCK_ACCOUNTS_KEY, accounts)
+  }
+  resetLocalData()
+}
+
+function saveMockAccount(profile: Profile, previousEmail?: string): void {
+  const accounts = mockAccounts()
+  if (previousEmail) delete accounts[emailKey(previousEmail)]
+  accounts[emailKey(profile.email)] = { profile, going: goingIds(), feedback: feedbackList() }
+  writeJSON(MOCK_ACCOUNTS_KEY, accounts)
 }
 
 /** "Not now" on a check-in: never ask about this event again (brand rule: never nag twice). */
@@ -113,10 +186,12 @@ export function dismissCheckIn(eventId: string): void {
 
 // ---------- actions ----------
 
-export async function saveProfile(profile: Profile): Promise<void> {
-  if (USE_MOCK) return
-  const { id } = await request<{ id: string }>("/api/profile", { method: "POST", body: profile })
-  writeJSON(STUDENT_ID_KEY, id)
+/** Create the account (sign-up) or update it (Profile page). Pass the old email if it changed. */
+export async function saveProfile(profile: Profile, previousEmail?: string): Promise<void> {
+  if (USE_MOCK) return saveMockAccount(profile, previousEmail)
+  const id = studentId() ?? undefined
+  const res = await request<{ id: string }>("/api/profile", { method: "POST", body: { ...profile, id } })
+  writeJSON(STUDENT_ID_KEY, res.id)
 }
 
 export async function markGoing(eventId: string, going: boolean): Promise<void> {
