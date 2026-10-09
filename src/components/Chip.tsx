@@ -7,21 +7,17 @@ interface ChipProps extends Omit<ComponentProps<"button">, "type"> {
   mode?: "toggle" | "radio"
 }
 
-/** Large, tappable pill used for interests, year, goal and feed filters. */
+/**
+ * Brand InterestChip (`wtc-chip`): 36px pill; selected = blue-soft fill, blue border and a blue dot.
+ * The invisible ::after stretches the tap area to 44px without changing the look.
+ */
 export function Chip({ selected, mode = "toggle", className, ...props }: ChipProps) {
   const a11y = mode === "radio" ? { role: "radio", "aria-checked": selected } : { "aria-pressed": selected }
   return (
     <button
       type="button"
       {...a11y}
-      className={cn(
-        "inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors",
-        "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
-        selected
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-input bg-background text-foreground hover:bg-muted",
-        className,
-      )}
+      className={cn("wtc-chip relative shrink-0 after:absolute after:inset-x-0 after:-inset-y-1 after:content-['']", className)}
       {...props}
     />
   )

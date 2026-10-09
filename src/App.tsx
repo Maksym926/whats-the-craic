@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import { AppShell } from "@/components/AppShell"
 import { RedirectIfProfile, RequireProfile } from "@/components/ProfileGate"
+import { ScrollToTop } from "@/components/ScrollToTop"
 import { TabLayout } from "@/components/TabLayout"
 import EventDetail from "@/pages/EventDetail"
 import Food from "@/pages/Food"
@@ -13,6 +14,7 @@ import Welcome from "@/pages/Welcome"
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AppShell>
         <Routes>
           {/* Sign-up flow: only while there's no profile */}

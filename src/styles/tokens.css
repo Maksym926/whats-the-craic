@@ -1,0 +1,41 @@
+/* What's The Craic — design tokens. Light = Paper, dark = Night. */
+:root, [data-theme="light"] {
+  --surface: #ffffff;
+  --surface-raised: #f5f4f0;
+  --line: #e3e1db;
+  --ink: #1e1f21;
+  --ink-muted: #66676b;
+  --craic-blue: #1b5aff;
+  --craic-blue-text: #1b5aff;
+  --blue-soft: #e9efff;
+  --on-blue: #ffffff;
+  --positive: #0f7a55;
+  --negative: #c2372c;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --font-display: "Outfit", "Satoshi", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+[data-theme="dark"] {
+  --surface: #171717;
+  --surface-raised: #212224;
+  --line: #323336;
+  --ink: #f5f4f0;
+  --ink-muted: #a1a2a6;
+  --craic-blue: #1b5aff;
+  --craic-blue-text: #6e93ff;
+  --blue-soft: #16224a;
+  --on-blue: #ffffff;
+  --positive: #4fd49c;
+  --negative: #ff8478;
+}

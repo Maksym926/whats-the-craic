@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { Chip } from "@/components/Chip"
+import { PillButton } from "@/components/PillButton"
 import { StepHeader } from "@/components/StepHeader"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -13,6 +13,9 @@ import { COLLEGES, YEARS } from "@/types"
 type Errors = Partial<Record<keyof RegistrationDraft, string>>
 
 const EMPTY: RegistrationDraft = { name: "", college: "", year: "", email: "", emailNotifications: false }
+
+// Brand input: surface-raised fill, 1px line, 8px radius, 48px tall.
+const FIELD = "h-12 rounded-input border-line bg-surface-raised px-4 text-[15px]"
 
 function validate(d: RegistrationDraft): Errors {
   const errors: Errors = {}
@@ -45,16 +48,18 @@ export default function Registration() {
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-1 flex-col">
-      <StepHeader step={1} total={2} title="About you" subtitle="So we can find events at your college." backTo="/" />
+      <StepHeader step={1} total={2} title="about you" subtitle="So we can find events at your college." backTo="/" />
 
-      <div className="flex flex-col gap-6 px-6 py-6">
+      <div className="flex flex-col gap-6 px-4 py-8">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="name">First name</Label>
+          <Label htmlFor="name" className="type-label">
+            first name
+          </Label>
           <Input
             id="name"
             autoComplete="given-name"
             placeholder="e.g. Aoife"
-            className="h-12 text-base"
+            className={FIELD}
             value={draft.name}
             onChange={(e) => update("name", e.target.value)}
             aria-invalid={!!errors.name}
@@ -64,19 +69,21 @@ export default function Registration() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="college">College</Label>
+          <Label htmlFor="college" className="type-label">
+            college
+          </Label>
           <Select value={draft.college} onValueChange={(v) => update("college", v)}>
             <SelectTrigger
               id="college"
-              className="w-full text-base data-[size=default]:h-12"
+              className={`w-full ${FIELD} data-[size=default]:h-12`}
               aria-invalid={!!errors.college}
               aria-describedby={errors.college ? "college-error" : undefined}
             >
               <SelectValue placeholder="Choose your college" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-card border-line">
               {COLLEGES.map((c) => (
-                <SelectItem key={c} value={c} className="min-h-11 text-base">
+                <SelectItem key={c} value={c} className="min-h-11 text-[15px]">
                   {c}
                 </SelectItem>
               ))}
@@ -86,11 +93,11 @@ export default function Registration() {
         </div>
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 text-sm font-medium">Year</legend>
+          <legend className="type-label mb-2">year</legend>
           <div role="radiogroup" aria-label="Year" className="flex flex-wrap gap-2">
             {YEARS.map((y) => (
               <Chip key={y} mode="radio" selected={draft.year === y} onClick={() => update("year", y)}>
-                {y}
+                {y.toLowerCase()}
               </Chip>
             ))}
           </div>
@@ -98,8 +105,8 @@ export default function Registration() {
         </fieldset>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="email">
-            Email <span className="font-normal text-muted-foreground">(optional)</span>
+          <Label htmlFor="email" className="type-label">
+            email <span className="font-normal text-ink-muted">(optional)</span>
           </Label>
           <Input
             id="email"
@@ -107,7 +114,7 @@ export default function Registration() {
             inputMode="email"
             autoComplete="email"
             placeholder="you@college.ie"
-            className="h-12 text-base"
+            className={FIELD}
             value={draft.email}
             onChange={(e) => update("email", e.target.value)}
             aria-invalid={!!errors.email}
@@ -116,12 +123,15 @@ export default function Registration() {
           <FieldError id="email-error" message={errors.email} />
         </div>
 
-        <label htmlFor="email-notifications" className="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl border p-4">
+        <label
+          htmlFor="email-notifications"
+          className="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-card border border-line bg-surface-raised p-4"
+        >
           <span className="flex flex-col gap-0.5">
-            <span id="email-notifications-label" className="font-medium">
-              Email me about events I'd like
+            <span id="email-notifications-label" className="type-heading">
+              email me events i'd like
             </span>
-            <span className="text-sm text-muted-foreground">You can turn this off any time in Profile.</span>
+            <span className="type-small text-ink-muted">Turn it off any time in your profile.</span>
           </span>
           <Switch
             id="email-notifications"
@@ -132,10 +142,10 @@ export default function Registration() {
         </label>
       </div>
 
-      <div className="sticky bottom-0 mt-auto border-t bg-background p-4">
-        <Button type="submit" className="h-12 w-full text-base">
-          Next
-        </Button>
+      <div className="sticky bottom-0 mt-auto border-t border-line bg-surface p-4">
+        <PillButton type="submit" className="w-full">
+          next
+        </PillButton>
       </div>
     </form>
   )
@@ -144,7 +154,7 @@ export default function Registration() {
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null
   return (
-    <p id={id} role="alert" className="text-sm text-destructive">
+    <p id={id} role="alert" className="type-small text-negative">
       {message}
     </p>
   )

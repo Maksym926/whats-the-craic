@@ -11,32 +11,32 @@ interface StepHeaderProps {
 
 export function StepHeader({ step, total, title, subtitle, backTo }: StepHeaderProps) {
   return (
-    <header className="flex flex-col gap-4 px-6 pt-4">
+    <header className="flex flex-col gap-6 px-4 pt-4">
       <div className="flex items-center justify-between">
         <Link
           to={backTo}
           aria-label="Back"
-          className="-ml-3 flex size-11 items-center justify-center rounded-full hover:bg-muted"
+          className="flex size-11 items-center justify-center rounded-full border border-line hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-craic-blue-text"
         >
           <ArrowLeft className="size-5" aria-hidden />
         </Link>
-        <span className="text-sm text-muted-foreground">
-          Step {step} of {total}
+        <span className="type-eyebrow text-ink-muted">
+          step {step} of {total}
         </span>
       </div>
       <div
-        className="h-1.5 overflow-hidden rounded-full bg-muted"
+        className="h-1 overflow-hidden rounded-full bg-line"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={total}
         aria-valuenow={step}
         aria-label="Sign-up progress"
       >
-        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(step / total) * 100}%` }} />
+        <div className="h-full rounded-full bg-ink transition-all" style={{ width: `${(step / total) * 100}%` }} />
       </div>
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold">{title}</h1>
-        {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+      <div className="flex flex-col gap-2">
+        <h1 className="type-display-l">{title}</h1>
+        {subtitle && <p className="text-ink-muted">{subtitle}</p>}
       </div>
     </header>
   )

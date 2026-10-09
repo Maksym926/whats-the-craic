@@ -1,11 +1,10 @@
 import { useState } from "react"
 import { Navigate, useNavigate } from "react-router-dom"
 import { Chip } from "@/components/Chip"
+import { PillButton } from "@/components/PillButton"
 import { StepHeader } from "@/components/StepHeader"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
 import { useProfile } from "@/context/profile"
-import { CATEGORY_EMOJI, GOAL_EMOJI } from "@/lib/categories"
+import { CATEGORY_LABEL, GOAL_LABEL } from "@/lib/categories"
 import { clearDraft, loadDraft } from "@/lib/registrationDraft"
 import { cn } from "@/lib/utils"
 import { CATEGORIES, GOALS, type Category, type Goal } from "@/types"
@@ -47,41 +46,28 @@ export default function Onboarding() {
       <StepHeader
         step={2}
         total={2}
-        title={`Nice one, ${draft.name}! What are you into?`}
-        subtitle="Pick as many as you like."
+        title="what are you into?"
+        subtitle={`Nice one, ${draft.name}. Pick as many as you like.`}
         backTo="/register"
       />
 
-      <div className="flex flex-col gap-8 px-6 py-6">
-        <section aria-labelledby="interests-heading" className="flex flex-col gap-3">
-          <h2 id="interests-heading" className="sr-only">
-            Interests
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((c) => (
-              <Chip key={c} selected={interests.includes(c)} onClick={() => toggleInterest(c)}>
-                <span aria-hidden>{CATEGORY_EMOJI[c]}</span>
-                {c}
-              </Chip>
-            ))}
-          </div>
+      <div className="flex flex-col gap-8 px-4 py-8">
+        <section aria-label="Interests" className="flex flex-wrap gap-2">
+          {CATEGORIES.map((c) => (
+            <Chip key={c} selected={interests.includes(c)} onClick={() => toggleInterest(c)}>
+              {CATEGORY_LABEL[c]}
+            </Chip>
+          ))}
+          <Chip selected={livesInAccommodation} onClick={() => setLivesInAccommodation((v) => !v)}>
+            i'm in accommodation
+          </Chip>
         </section>
 
-        <label htmlFor="accommodation" className="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-xl border p-4">
-          <span className="flex flex-col gap-0.5">
-            <span id="accommodation-label" className="font-medium">
-              I live in student accommodation
-            </span>
-            <span className="text-sm text-muted-foreground">We'll show you more halls and meet-up events.</span>
-          </span>
-          <Switch id="accommodation" aria-labelledby="accommodation-label" checked={livesInAccommodation} onCheckedChange={setLivesInAccommodation} />
-        </label>
-
-        <section aria-labelledby="goal-heading" className="flex flex-col gap-3">
-          <h2 id="goal-heading" className="text-lg font-semibold">
-            What's your main goal this term?
+        <section aria-labelledby="goal-heading" className="flex flex-col gap-4">
+          <h2 id="goal-heading" className="type-title">
+            main goal this term?
           </h2>
-          <div role="radiogroup" aria-labelledby="goal-heading" className="grid grid-cols-2 gap-3">
+          <div role="radiogroup" aria-labelledby="goal-heading" className="grid grid-cols-2 gap-2">
             {GOALS.map((g) => (
               <button
                 key={g}
@@ -90,32 +76,32 @@ export default function Onboarding() {
                 aria-checked={goal === g}
                 onClick={() => setGoal(g)}
                 className={cn(
-                  "flex min-h-20 flex-col items-start justify-center gap-1 rounded-xl border p-4 text-left font-medium transition-colors",
-                  "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
-                  goal === g ? "border-primary bg-secondary ring-2 ring-primary" : "hover:bg-muted",
+                  "type-heading flex min-h-16 items-center gap-2 rounded-card border p-4 text-left transition-colors",
+                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-craic-blue-text",
+                  goal === g
+                    ? "border-craic-blue bg-blue-soft text-craic-blue-text"
+                    : "border-line bg-surface-raised hover:border-ink-muted",
                 )}
               >
-                <span className="text-2xl" aria-hidden>
-                  {GOAL_EMOJI[g]}
-                </span>
-                {g}
+                {goal === g && <span className="wtc-dot size-1.5" aria-hidden />}
+                {GOAL_LABEL[g]}
               </button>
             ))}
           </div>
         </section>
       </div>
 
-      <div className="sticky bottom-0 mt-auto flex flex-col gap-2 border-t bg-background p-4">
+      <div className="sticky bottom-0 mt-auto flex flex-col gap-2 border-t border-line bg-surface p-4">
         {error && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="type-small text-negative">
             {error}
           </p>
         )}
-        <Button className="h-12 w-full text-base" disabled={missing.length > 0 || saving} onClick={finish}>
-          {saving ? "Saving…" : "Show me events"}
-        </Button>
+        <PillButton className="w-full" disabled={missing.length > 0 || saving} onClick={finish}>
+          {saving ? "saving…" : "show me events"}
+        </PillButton>
         {missing.length > 0 && (
-          <p className="text-center text-sm text-muted-foreground">Pick {missing.join(" and ")} to continue.</p>
+          <p className="type-small text-center text-ink-muted">Pick {missing.join(" and ")} to continue.</p>
         )}
       </div>
     </div>

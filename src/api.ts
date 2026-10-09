@@ -10,6 +10,7 @@
 // "Going" and feedback are also kept in localStorage so the UI and ranking
 // react instantly, in both modes.
 
+import { EVENT_LENGTH_MS } from "@/lib/format"
 import { rankEvents } from "@/lib/recommend"
 import { readJSON, writeJSON } from "@/lib/storage"
 import { MOCK_EVENTS } from "@/mock/events"
@@ -20,9 +21,6 @@ export const USE_MOCK = true
 const GOING_KEY = "craic.going"
 const FEEDBACK_KEY = "craic.feedback"
 const STUDENT_ID_KEY = "craic.studentId"
-
-/** An event counts as "over" (eligible for check-in) 2h after it starts. */
-const EVENT_LENGTH_MS = 2 * 60 * 60 * 1000
 
 // ---------- local state ----------
 
@@ -38,7 +36,8 @@ export function isGoing(eventId: string): boolean {
   return goingIds().includes(eventId)
 }
 
-const isOver = (e: Event) => new Date(e.start).getTime() + EVENT_LENGTH_MS < Date.now()
+/** True once an event is over (2h after start). */
+export const hasEnded = (e: Event) => new Date(e.start).getTime() + EVENT_LENGTH_MS < Date.now()
 const bySoonest = (a: Event, b: Event) => new Date(a.start).getTime() - new Date(b.start).getTime()
 
 // ---------- events ----------
@@ -56,13 +55,13 @@ async function fetchEvents(): Promise<Event[]> {
 /** Personalised feed: upcoming events ranked for this student, each with a `why`. */
 export async function getFeed(profile: Profile): Promise<Event[]> {
   const all = await fetchEvents()
-  return rankEvents(all.filter((e) => !isOver(e)), profile, feedbackList(), all)
+  return rankEvents(all.filter((e) => !hasEnded(e)), profile, feedbackList(), all)
 }
 
 /** Upcoming free-food events, soonest first. */
 export async function getFoodEvents(): Promise<Event[]> {
   const all = await fetchEvents()
-  return all.filter((e) => !isOver(e) && e.categories.includes("Free food")).sort(bySoonest)
+  return all.filter((e) => !hasEnded(e) && e.categories.includes("Free food")).sort(bySoonest)
 }
 
 export async function getEvent(id: string): Promise<Event | undefined> {
@@ -75,7 +74,7 @@ export async function getPendingCheckIns(): Promise<Event[]> {
   const all = await fetchEvents()
   const going = goingIds()
   const rated = new Set(feedbackList().map((f) => f.eventId))
-  return all.filter((e) => isOver(e) && going.includes(e.id) && !rated.has(e.id)).sort(bySoonest)
+  return all.filter((e) => hasEnded(e) && going.includes(e.id) && !rated.has(e.id)).sort(bySoonest)
 }
 
 // ---------- actions ----------

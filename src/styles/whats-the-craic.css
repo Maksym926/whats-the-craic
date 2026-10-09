@@ -1,0 +1,79 @@
+/* What's The Craic — component styles. Every value is a token from tokens.json.
+ *
+ * Copied from the design system (components/whats-the-craic.css). Changes:
+ *  - wrapped in @layer components so Tailwind utilities can adjust layout
+ *  - Google Fonts @import removed (fonts are bundled via @fontsource in index.css)
+ *  - body rule moved to index.css
+ *  - "Extensions" at the bottom: same visuals for states the original doesn't cover
+ */
+
+@layer components {
+  .wtc-pad { padding: var(--space-4); }
+  .wtc-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  .wtc-stack { display: flex; flex-direction: column; gap: var(--space-2); }
+
+  /* Button */
+  .wtc-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    height: 44px; padding: 0 var(--space-6); border-radius: var(--radius-pill); border: 1px solid transparent;
+    font: 600 15px/1 var(--font-sans); letter-spacing: -0.01em; cursor: pointer; text-transform: lowercase; }
+  .wtc-btn--primary { background: var(--craic-blue); color: var(--on-blue); }
+  .wtc-btn--secondary { background: transparent; color: var(--ink); border-color: var(--ink); }
+  .wtc-btn--ghost { background: transparent; color: var(--ink-muted); padding: 0 var(--space-3); }
+  .wtc-btn--sm { height: 36px; padding: 0 var(--space-4); font-size: 13px; }
+  .wtc-btn:focus-visible { outline: 2px solid var(--craic-blue-text); outline-offset: 2px; }
+
+  /* Interest chip (onboarding toggles) */
+  .wtc-chip { display: inline-flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 var(--space-4);
+    border-radius: var(--radius-pill); border: 1px solid var(--line); background: var(--surface-raised);
+    color: var(--ink); font: 600 13px/1 var(--font-sans); cursor: pointer; }
+  .wtc-chip[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--craic-blue); color: var(--craic-blue-text); }
+  .wtc-chip[aria-pressed="true"]::before { content: ""; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--craic-blue); }
+
+  /* Live badge — the dot */
+  .wtc-live { display: inline-flex; align-items: center; gap: var(--space-1); font: 600 11px/14px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); }
+  .wtc-dot { width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--craic-blue); flex: none; }
+  .wtc-live--muted { color: var(--ink-muted); }
+  .wtc-live--muted .wtc-dot { background: var(--ink-muted); }
+
+  /* Event card */
+  .wtc-card { background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-md);
+    padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); max-width: 340px; }
+  .wtc-card__eyebrow { font: 600 11px/14px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); display: flex; justify-content: space-between; }
+  .wtc-card__title { font: 600 17px/22px var(--font-sans); letter-spacing: -0.01em; margin: 0; color: var(--ink); }
+  .wtc-card__meta { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); margin: 0; }
+  .wtc-card__tags { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+  .wtc-tag { font: 500 12px/1 var(--font-sans); padding: 6px 10px; border-radius: var(--radius-pill); border: 1px solid var(--line); color: var(--ink-muted); }
+  .wtc-card--picked { border-color: var(--craic-blue); }
+  .wtc-card__why { font: 500 12px/16px var(--font-sans); color: var(--craic-blue-text); display: flex; align-items: center; gap: var(--space-1); }
+
+  /* Feedback prompt */
+  .wtc-feedback { background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); max-width: 420px; }
+  .wtc-feedback__q { margin: 0; font: 600 15px/20px var(--font-sans); color: var(--ink); }
+  .wtc-feedback__sub { margin: 2px 0 0; font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+  .wtc-thumb { width: 44px; height: 44px; border-radius: var(--radius-pill); border: 1px solid var(--line); background: var(--surface);
+    display: inline-flex; align-items: center; justify-content: center; color: var(--ink); cursor: pointer; padding: 0; }
+  .wtc-thumb svg { width: 20px; height: 20px; }
+  .wtc-thumb--up[aria-pressed="true"] { border-color: var(--positive); color: var(--positive); }
+  .wtc-thumb--down[aria-pressed="true"] { border-color: var(--negative); color: var(--negative); }
+  .wtc-thumb:focus-visible { outline: 2px solid var(--craic-blue-text); outline-offset: 2px; }
+
+  /* ---------- Extensions ---------- */
+
+  /* Single-select chips (role="radio") look exactly like pressed toggle chips. */
+  .wtc-chip[aria-checked="true"] { background: var(--blue-soft); border-color: var(--craic-blue); color: var(--craic-blue-text); }
+  .wtc-chip[aria-checked="true"]::before { content: ""; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--craic-blue); }
+  .wtc-chip:focus-visible { outline: 2px solid var(--craic-blue-text); outline-offset: 2px; }
+
+  .wtc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Type scale from tokens.json, as classes (avoids Tailwind text-size vs colour merge clashes). */
+  .type-display-xl { font: 600 64px/0.95 var(--font-display); letter-spacing: -0.03em; }
+  .type-display-l { font: 600 40px/1 var(--font-display); letter-spacing: -0.025em; }
+  .type-title { font: 600 24px/28px var(--font-display); letter-spacing: -0.02em; }
+  .type-heading { font: 600 17px/22px var(--font-sans); letter-spacing: -0.01em; }
+  .type-body { font: 400 15px/22px var(--font-sans); }
+  .type-small { font: 400 13px/18px var(--font-sans); }
+  .type-label { font: 600 13px/16px var(--font-sans); }
+  .type-eyebrow { font: 600 11px/14px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; }
+}
