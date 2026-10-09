@@ -1,16 +1,41 @@
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import { AppShell } from "@/components/AppShell"
-import { Button } from "@/components/ui/button"
+import { RedirectIfProfile, RequireProfile } from "@/components/ProfileGate"
+import { TabLayout } from "@/components/TabLayout"
+import EventDetail from "@/pages/EventDetail"
+import Food from "@/pages/Food"
+import Onboarding from "@/pages/Onboarding"
+import Profile from "@/pages/Profile"
+import Recommends from "@/pages/Recommends"
+import Registration from "@/pages/Registration"
+import Welcome from "@/pages/Welcome"
 
-// Placeholder until routing lands (Step 3).
 function App() {
   return (
-    <AppShell>
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-        <h1 className="text-3xl font-bold">What's The Craic</h1>
-        <p className="text-muted-foreground">Campus events, picked for you.</p>
-        <Button className="h-12 w-full text-base">Get started</Button>
-      </main>
-    </AppShell>
+    <BrowserRouter>
+      <AppShell>
+        <Routes>
+          {/* Sign-up flow: only while there's no profile */}
+          <Route element={<RedirectIfProfile />}>
+            <Route path="/" element={<Welcome />} />
+            <Route path="/register" element={<Registration />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+          </Route>
+
+          {/* App: needs a profile */}
+          <Route element={<RequireProfile />}>
+            <Route element={<TabLayout />}>
+              <Route path="/events" element={<Recommends />} />
+              <Route path="/food" element={<Food />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+            <Route path="/events/:id" element={<EventDetail />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppShell>
+    </BrowserRouter>
   )
 }
 
