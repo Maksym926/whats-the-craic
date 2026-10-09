@@ -1,36 +1,29 @@
 import { useState, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { Chip } from "@/components/Chip"
+import { FieldError } from "@/components/FieldError"
 import { PillButton } from "@/components/PillButton"
 import { StepHeader } from "@/components/StepHeader"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { isValidEmail, loadDraft, saveDraft, type RegistrationDraft } from "@/lib/registrationDraft"
+import { FIELD } from "@/lib/formStyles"
+import {
+  loadDraft,
+  saveDraft,
+  validateDetails,
+  type DetailErrors,
+  type RegistrationDraft,
+} from "@/lib/registrationDraft"
 import { COLLEGES, YEARS } from "@/types"
 
-type Errors = Partial<Record<keyof RegistrationDraft, string>>
-
 const EMPTY: RegistrationDraft = { name: "", college: "", year: "", email: "", emailNotifications: false }
-
-// Brand input: surface-raised fill, 1px line, 8px radius, 48px tall.
-const FIELD = "h-12 rounded-input border-line bg-surface-raised px-4 text-[15px]"
-
-function validate(d: RegistrationDraft): Errors {
-  const errors: Errors = {}
-  if (!d.name.trim()) errors.name = "Tell us what to call you."
-  if (!d.college) errors.college = "Pick your college."
-  if (!d.year) errors.year = "Pick your year."
-  if (d.emailNotifications && !d.email.trim()) errors.email = "Add your email to get event emails."
-  else if (d.email.trim() && !isValidEmail(d.email)) errors.email = "That email doesn't look right."
-  return errors
-}
 
 export default function Registration() {
   const navigate = useNavigate()
   const [draft, setDraft] = useState<RegistrationDraft>(() => loadDraft() ?? EMPTY)
-  const [errors, setErrors] = useState<Errors>({})
+  const [errors, setErrors] = useState<DetailErrors>({})
 
   const update = <K extends keyof RegistrationDraft>(key: K, value: RegistrationDraft[K]) => {
     setDraft((d) => ({ ...d, [key]: value }))
@@ -39,7 +32,7 @@ export default function Registration() {
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
-    const found = validate(draft)
+    const found = validateDetails(draft)
     setErrors(found)
     if (Object.keys(found).length) return
     saveDraft({ ...draft, name: draft.name.trim(), email: draft.email.trim() })
@@ -75,7 +68,7 @@ export default function Registration() {
           <Select value={draft.college} onValueChange={(v) => update("college", v)}>
             <SelectTrigger
               id="college"
-              className={`w-full ${FIELD} data-[size=default]:h-12`}
+              className={`w-full ${FIELD}`}
               aria-invalid={!!errors.college}
               aria-describedby={errors.college ? "college-error" : undefined}
             >
@@ -148,14 +141,5 @@ export default function Registration() {
         </PillButton>
       </div>
     </form>
-  )
-}
-
-function FieldError({ id, message }: { id: string; message?: string }) {
-  if (!message) return null
-  return (
-    <p id={id} role="alert" className="type-small text-negative">
-      {message}
-    </p>
   )
 }

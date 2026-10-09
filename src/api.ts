@@ -12,7 +12,7 @@
 
 import { EVENT_LENGTH_MS } from "@/lib/format"
 import { rankEvents } from "@/lib/recommend"
-import { readJSON, writeJSON } from "@/lib/storage"
+import { readJSON, removeKey, writeJSON } from "@/lib/storage"
 import { DEMO_GOING, MOCK_EVENTS } from "@/mock/events"
 import type { Event, Feedback, Profile } from "@/types"
 
@@ -88,6 +88,22 @@ export async function getPendingCheckIns(): Promise<Event[]> {
   return all
     .filter((e) => hasEnded(e) && going.includes(e.id) && !skip.has(e.id))
     .sort((a, b) => bySoonest(b, a))
+}
+
+/** Events the student has checked in on, latest answer first. */
+export async function getCheckInHistory(): Promise<{ event: Event; feedback: Feedback }[]> {
+  const byId = new Map((await fetchEvents()).map((e) => [e.id, e]))
+  return feedbackList()
+    .flatMap((feedback) => {
+      const event = byId.get(feedback.eventId)
+      return event ? [{ event, feedback }] : []
+    })
+    .reverse()
+}
+
+/** "Start over": forget going, check-ins and dismissals on this device. (Server data is untouched.) */
+export function resetLocalData(): void {
+  for (const key of [GOING_KEY, FEEDBACK_KEY, DISMISSED_KEY, STUDENT_ID_KEY]) removeKey(key)
 }
 
 /** "Not now" on a check-in: never ask about this event again (brand rule: never nag twice). */
