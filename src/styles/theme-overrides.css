@@ -1,0 +1,27 @@
+/* App-specific deviation from the design system (tokens.css is kept as delivered).
+ *
+ * The page background uses blue-soft: navy #16224a (Night) / pale blue #e9efff (Paper).
+ * Because blue-soft is now the ground, the surfaces, lines and "selected" tint around it
+ * are re-tuned so cards, chips and text stay distinct. Text pairs checked for WCAG AA:
+ *   Night  ink-muted #a9b3cf ≥ 6.3:1, craic-blue-text #9db5ff ≥ 5.6:1 on every surface
+ *   Paper  ink-muted #66676b ≥ 4.9:1, craic-blue-text #1548d9 ≥ 5.4:1 on every surface
+ * craic-blue (#1b5aff: buttons and the dot) is unchanged.
+ */
+
+:root,
+[data-theme="light"] {
+  --surface: #e9efff;
+  --surface-raised: #ffffff;
+  --line: #d3dbf2;
+  --craic-blue-text: #1548d9;
+  --blue-soft: #d6e1ff;
+}
+
+[data-theme="dark"] {
+  --surface: #16224a;
+  --surface-raised: #1f2d5c;
+  --line: #2c3b6e;
+  --ink-muted: #a9b3cf;
+  --craic-blue-text: #9db5ff;
+  --blue-soft: #24367d;
+}
