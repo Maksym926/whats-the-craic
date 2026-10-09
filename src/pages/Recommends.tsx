@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react"
 import * as api from "@/api"
+import { CheckIn } from "@/components/CheckIn"
 import { EventList } from "@/components/EventList"
 import { FilterChips } from "@/components/FilterChips"
 import { useProfile } from "@/context/profile"
@@ -22,12 +23,34 @@ export default function Recommends() {
 
   const shown = filter ? events?.filter((e) => e.categories.includes(filter)) : events
 
+  // Post-event check-in: one at a time, at the top of the feed.
+  const pending = useAsync(api.getPendingCheckIns)
+  const checkIn = pending.data?.[0]
+  const [thanks, setThanks] = useState(false)
+
+  const checkInDone = (answered: boolean) => {
+    setThanks(answered)
+    pending.reload()
+    if (answered) reload() // re-rank with the new 👍/👎
+  }
+
   return (
     <main className="flex flex-col">
       <header className="flex flex-col gap-2 px-4 pt-8 pb-4">
         <p className="type-eyebrow text-ink-muted">hey {profile?.name}</p>
         <h1 className="type-display-l">picked for you</h1>
       </header>
+
+      {checkIn && (
+        <div className="px-4 pb-4">
+          <CheckIn key={checkIn.id} event={checkIn} onDone={(f) => checkInDone(f?.liked !== undefined)} />
+        </div>
+      )}
+      {thanks && !checkIn && (
+        <p role="status" className="type-small px-4 pb-4 text-ink-muted">
+          Thanks, your picks just got better.
+        </p>
+      )}
 
       <div className="sticky top-0 z-10 border-b border-line bg-surface px-4 py-2">
         <FilterChips categories={filterOptions} selected={filter} onChange={setFilter} />

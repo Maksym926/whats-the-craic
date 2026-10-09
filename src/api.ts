@@ -13,27 +13,38 @@
 import { EVENT_LENGTH_MS } from "@/lib/format"
 import { rankEvents } from "@/lib/recommend"
 import { readJSON, writeJSON } from "@/lib/storage"
-import { MOCK_EVENTS } from "@/mock/events"
+import { DEMO_GOING, MOCK_EVENTS } from "@/mock/events"
 import type { Event, Feedback, Profile } from "@/types"
 
 export const USE_MOCK = true
 
 const GOING_KEY = "craic.going"
 const FEEDBACK_KEY = "craic.feedback"
+const DISMISSED_KEY = "craic.checkInDismissed"
 const STUDENT_ID_KEY = "craic.studentId"
 
 // ---------- local state ----------
 
 function goingIds(): string[] {
-  return readJSON<string[]>(GOING_KEY, [])
+  // Mock only: a fresh student "went" to a past event, so the check-in can be demoed.
+  return readJSON<string[]>(GOING_KEY, USE_MOCK ? DEMO_GOING : [])
 }
 
 function feedbackList(): Feedback[] {
   return readJSON<Feedback[]>(FEEDBACK_KEY, [])
 }
 
+function dismissedIds(): string[] {
+  return readJSON<string[]>(DISMISSED_KEY, [])
+}
+
 export function isGoing(eventId: string): boolean {
   return goingIds().includes(eventId)
+}
+
+/** The student's check-in for an event, if they gave one. */
+export function getFeedback(eventId: string): Feedback | undefined {
+  return feedbackList().find((f) => f.eventId === eventId)
 }
 
 /** True once an event is over (2h after start). */
@@ -69,12 +80,19 @@ export async function getEvent(id: string): Promise<Event | undefined> {
   return all.find((e) => e.id === id)
 }
 
-/** Past events the student said they were going to but hasn't rated yet. */
+/** Past events the student said they were going to, not yet rated or dismissed. Most recent first. */
 export async function getPendingCheckIns(): Promise<Event[]> {
   const all = await fetchEvents()
   const going = goingIds()
-  const rated = new Set(feedbackList().map((f) => f.eventId))
-  return all.filter((e) => hasEnded(e) && going.includes(e.id) && !rated.has(e.id)).sort(bySoonest)
+  const skip = new Set([...feedbackList().map((f) => f.eventId), ...dismissedIds()])
+  return all
+    .filter((e) => hasEnded(e) && going.includes(e.id) && !skip.has(e.id))
+    .sort((a, b) => bySoonest(b, a))
+}
+
+/** "Not now" on a check-in: never ask about this event again (brand rule: never nag twice). */
+export function dismissCheckIn(eventId: string): void {
+  writeJSON(DISMISSED_KEY, [...new Set([...dismissedIds(), eventId])])
 }
 
 // ---------- actions ----------

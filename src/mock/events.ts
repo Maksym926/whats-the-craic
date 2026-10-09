@@ -8,6 +8,9 @@ function at(days: number, hour: number, minute = 0): string {
   return d.toISOString()
 }
 
+/** Mock mode: a new student starts as "going" to these past events, so the 👍/👎 check-in shows up in demos. */
+export const DEMO_GOING = ["evt-coffee-mixer"]
+
 const SU = "Students' Union"
 const SOCS = "Societies portal"
 const COLLEGE = "College website"

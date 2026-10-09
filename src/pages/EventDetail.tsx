@@ -1,7 +1,8 @@
-import { ArrowLeft, ArrowUpRight, Check, MapPin, Users } from "lucide-react"
+import { ArrowLeft, ArrowUpRight, Check, MapPin, ThumbsDown, ThumbsUp, Users } from "lucide-react"
 import { useCallback, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import * as api from "@/api"
+import { CheckIn } from "@/components/CheckIn"
 import { EventImage } from "@/components/EventImage"
 import { LiveBadge } from "@/components/LiveBadge"
 import { PillButton } from "@/components/PillButton"
@@ -22,6 +23,7 @@ export default function EventDetail() {
   const [initiallyGoing] = useState(() => api.isGoing(id))
   const [going, setGoing] = useState(initiallyGoing)
   const [saveError, setSaveError] = useState(false)
+  const [feedback, setFeedback] = useState(() => api.getFeedback(id))
 
   // Opened from a shared link (no history) → go to the feed instead of leaving the app.
   const back = () => (location.key === "default" ? navigate("/events") : navigate(-1))
@@ -134,7 +136,13 @@ export default function EventDetail() {
 
       <div className="sticky bottom-0 mt-auto flex flex-col gap-2 border-t border-line bg-surface p-4">
         {ended ? (
-          <p className="text-center text-ink-muted">This one's over.</p>
+          feedback ? (
+            <FeedbackSummary liked={feedback.went ? feedback.liked : undefined} went={feedback.went} />
+          ) : going ? (
+            <CheckIn event={event} dismissible={false} onDone={(f) => f && setFeedback(f)} />
+          ) : (
+            <p className="text-center text-ink-muted">This one's over.</p>
+          )
         ) : (
           <>
             {saveError && (
@@ -161,5 +169,18 @@ export default function EventDetail() {
         )}
       </div>
     </main>
+  )
+}
+
+/** What the student said after an event they rated. Icon carries the meaning, colour confirms it. */
+function FeedbackSummary({ went, liked }: { went: boolean; liked?: boolean }) {
+  if (!went) return <p className="text-center text-ink-muted">You didn't make this one.</p>
+  if (liked === undefined) return <p className="text-center text-ink-muted">Thanks for checking in.</p>
+  const Icon = liked ? ThumbsUp : ThumbsDown
+  return (
+    <p className={`flex items-center justify-center gap-2 font-semibold ${liked ? "text-positive" : "text-negative"}`}>
+      <Icon className="size-5" aria-hidden />
+      {liked ? "you liked this one" : "not for you"}
+    </p>
   )
 }
